@@ -1,0 +1,34 @@
+version: '3'
+services:
+  todo:
+    networks:
+      - my_stack_network
+    image: 'vmonte/todoexample:latest'
+    environment:
+      - POSTGRES_HOST=postgres
+      - CORS_ORIGIN_WHITELIST=my-stack.vmonte.com
+      - ALLOWED_HOSTS=my-stack.vmonte.com todo
+    depends_on:
+      - 'postgres'
+    deploy:
+        labels:
+          - "traefik.port=8000"
+          - "traefik.backend=todo"
+          - "traefik.frontend.rule=Host:my-stack.vmonte.com;PathPrefixStrip:/tapi"
+    command: sh ./start.sh
+  postgres:
+    networks:
+      - my_stack_network
+    image: "postgres:9.6"
+    environment:
+      - POSTGRES_PASSWORD=todoer
+      - POSTGRES_USER=todoer
+      - POSTGRES_DB=todoer
+    deploy:
+      labels:
+        - "traefik.enable=false"
+
+networks:
+  my_stack_network:
+    external: true
+
